@@ -1,14 +1,30 @@
-const express = require('express');
-const PORT = 3001
-const app = express();
+// Replace with your actual API key
 
-app.use(express.json());
+require('dotenv').config({ path: './app.env' });
+const API_KEY = process.env.GEMINI_API_KEY;
+const endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=" + API_KEY;
 
-app.get('/home', (req,res) => {
-    res.send('hello this is my first Node.js program now!');
-});
+async function callGemini(prompt) {
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      contents: [{
+        parts: [{ text: prompt }]
+      }]
+    })
+  });
 
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-})
+  const data = await response.json();
 
+if (data.candidates && data.candidates.length > 0) {
+  console.log("Gemini response:", data.candidates[0].content.parts[0].text);
+} else {
+  console.error("Unexpected response:", data);
+}
+}
+
+// Example usage
+callGemini("Hi, How are you?");
